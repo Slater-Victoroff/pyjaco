@@ -32,6 +32,13 @@ import re
 import StringIO
 import ast
 import inspect
+try:
+    from _version import get_version, parse_version
+except ImportError:
+    from .._version import get_version, parse_version
+
+__version__ = get_version()
+__version_info__ = parse_version(__version__)
 
 def compile_string(script, jsvars = None):
     """Compile a python expression into javascript"""

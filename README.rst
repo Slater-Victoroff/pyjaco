@@ -1,4 +1,4 @@
-pyjaco
+
 =====
 
 Python to JavaScript translator.
@@ -69,12 +69,18 @@ iteration. When the files match, casetest will exit.
 Usage
 ------------
 
+From source code::
+
     import sys
 	from pyjaco import Compiler
 	code = open("tojs.py", "r")
 	compiler = Compiler()
 	compiler.append_string(code.read())
 	print str(compiler)
+
+Using the pyjs.py script::
+
+	./pyjs.py filename.py --output filename.js --watch
 
 License
 -------
