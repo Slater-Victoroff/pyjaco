@@ -22,8 +22,8 @@ def criterion(a, b, c, pts_list):
    uy = float(ay - cy)
    vx = float(bx - cx)
    vy = float(by - cy)
-   len_u = sqrt(ux*ux + uy*uy)
-   len_v = sqrt(vx*vx + vy*vy)
+   len_u = sqrt(ux**2 + uy**2)
+   len_v = sqrt(vx**2 + vy**2)
    return (ux*vx + uy*vy)/(len_u*len_v)
 
 def find_third_point(a, b, pts_list, edges):
@@ -54,8 +54,8 @@ def find_third_point(a, b, pts_list, edges):
 
 def lies_inside(c, bdy_edges):
    for edge in bdy_edges:
-       a,b = edge
-       if c == a or c == b: return False
+      a,b = edge
+      if c in [a, b]: return False
    return True
 
 def is_boundary_edge(a, b, bdy_edges):
@@ -117,53 +117,50 @@ def onCountClick(event):
     window.testObj.test()
 
 def helloWorld():
-    window.testObj = TestClass.new()
+   window.testObj = TestClass.new()
 
-    pushButton = YAHOO.widget.Button.new(
-        {
-            'label' : 'Hello, World!',
-            'id' : 'pushButton',
-            'container' : 'pushButtons'
-        }
-    )
-    pushButton.on('click', onButtonClick)
-    pushButton2 = YAHOO.widget.Button.new(
-        {
-            'label' : 'Hello, Dude!',
-            'id' : 'pushButton2',
-            'container' : 'pushButtons',
-            'onclick' : {
-                'fn' : onButtonClick,
-                'obj' : 'Dude'
-            }
-        }
-    )
+   pushButton = YAHOO.widget.Button.new(
+       {
+           'label' : 'Hello, World!',
+           'id' : 'pushButton',
+           'container' : 'pushButtons'
+       }
+   )
+   pushButton.on('click', onButtonClick)
+   pushButton2 = YAHOO.widget.Button.new(
+       {
+           'label' : 'Hello, Dude!',
+           'id' : 'pushButton2',
+           'container' : 'pushButtons',
+           'onclick' : {
+               'fn' : onButtonClick,
+               'obj' : 'Dude'
+           }
+       }
+   )
 
-    i = 1
-    while i <= 3:
-        YAHOO.widget.Button.new(
-            {
-                'label' : 'Hello ' + i + '!',
-                'id' : 'pushButtonIter' + i,
-                'container' : 'pushButtons',
-                'onclick' : {
-                    'fn' : onButtonClick,
-                    'obj' : 'Person #' + i
-                }
-            }
-        )
-        i += 1
-
-    YAHOO.widget.Button.new(
-        {
-            'label' : 'Count',
-            'id' : 'pushButtonCount',
-            'container' : 'pushButtons',
-            'onclick' : {
-                'fn' : onCountClick
-            }
-        }
-    )
+   for i in range(1, 4):
+      YAHOO.widget.Button.new(
+          {
+              'label' : 'Hello ' + i + '!',
+              'id' : 'pushButtonIter' + i,
+              'container' : 'pushButtons',
+              'onclick' : {
+                  'fn' : onButtonClick,
+                  'obj' : 'Person #' + i
+              }
+          }
+      )
+   YAHOO.widget.Button.new(
+       {
+           'label' : 'Count',
+           'id' : 'pushButtonCount',
+           'container' : 'pushButtons',
+           'onclick' : {
+               'fn' : onCountClick
+           }
+       }
+   )
 
 def onButtonClick(event, target='World'):
     if target == 'World':
@@ -187,43 +184,39 @@ class GoL(object):
     def get(self, x, y):
         return self.grid[((x + self.width) % self.width) + ((y + self.height) % self.height) * self.width]
     def iter(self):
-        toDie = Array.new(0)
-        toLive = Array.new(0)
-        for x in range(0, self.width):
-            for y in range(0, self.height):
-                count = 0
-                if self.get(x-1, y-1):
-                    count += 1
-                if self.get(x, y-1):
-                    count += 1
-                if self.get(x+1, y-1):
-                    count += 1
-                if self.get(x-1, y):
-                    count += 1
-                if self.get(x+1, y):
-                    count += 1
-                if self.get(x-1, y+1):
-                    count += 1
-                if self.get(x, y+1):
-                    count += 1
-                if self.get(x+1, y+1):
-                    count += 1
+       toDie = Array.new(0)
+       toLive = Array.new(0)
+       for x in range(self.width):
+          for y in range(self.height):
+             count = 0
+             if self.get(x-1, y-1):
+                 count += 1
+             if self.get(x, y-1):
+                 count += 1
+             if self.get(x+1, y-1):
+                 count += 1
+             if self.get(x-1, y):
+                 count += 1
+             if self.get(x+1, y):
+                 count += 1
+             if self.get(x-1, y+1):
+                 count += 1
+             if self.get(x, y+1):
+                 count += 1
+             if self.get(x+1, y+1):
+                 count += 1
 
-                if self.get(x, y):
-                    if count < 2:
-                        toDie[toDie.length] = x + y*self.width
-                    elif count > 3:
-                        toDie[toDie.length] = x + y*self.width
-                else:
-                    if count == 3:
-                        toLive[toLive.length] = x + y*self.width
+             if self.get(x, y) and count < 2 or self.get(x, y) and count > 3:
+                toDie[toDie.length] = x + y*self.width
+             elif not self.get(x, y) and (self.get(x, y) or count == 3):
+                toLive[toLive.length] = x + y*self.width
 
-        for i in range(toDie.length):
-            self.grid[toDie[i]] = False
-        for i in range(toLive.length):
-            self.grid[toLive[i]] = True
+       for i in range(toDie.length):
+           self.grid[toDie[i]] = False
+       for i in range(toLive.length):
+           self.grid[toLive[i]] = True
 
-        self.draw()
+       self.draw()
     def draw(self):
         i = 0
         for x in range(0, self.width*10, 10):

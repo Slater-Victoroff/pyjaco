@@ -66,7 +66,7 @@ class XmlWriter(object):
     @staticmethod
     def indent(writer,indent):
         writer.write("\n")
-        for x in xrange(0,indent):
+        for _ in xrange(0,indent):
             writer.write("  ")
 
     def createRoot(self,tag):

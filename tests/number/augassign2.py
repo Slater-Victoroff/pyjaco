@@ -37,9 +37,9 @@ def f4(x):
 def f5(x):
     a = 1
     if x:
-        a = a + 1
+        a += 1
     else:
-        a = a - 1
+        a -= 1
     return a
 
 print f1(3)

@@ -1,9 +1,6 @@
 def loop1(x):
-    a = 0
-    for i in range(x):
-        x
-        a += i
-    return a
+    x
+    return sum(range(x))
 
 print loop1(1)
 print loop1(2)

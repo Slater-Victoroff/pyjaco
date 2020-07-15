@@ -67,24 +67,22 @@ class Formater(object):
         """
         Returns a string representation of the buffer.
         """
-        if size == None:
+        if size is None:
             text = self.__string_buffer + "".join(self.__buffer)
             self.__buffer = []
             self.__string_buffer = ""
-            return text
         else:
             if len(self.__string_buffer) < size:
                 self.__string_buffer += "".join(self.__buffer)
                 self.__buffer = []
                 if len(self.__string_buffer) < size:
                     text, self.__string_buffer = self.__string_buffer, ""
-                    return text
                 else:
                     text, self.__string_buffer = self.__string_buffer[:size], \
                         self.__string_buffer[size:]
-                    return text
             else:
                 text, self.__string_buffer = self.__string_buffer[:size], \
                     self.__string_buffer[size:]
-                return text
+
+        return text
 

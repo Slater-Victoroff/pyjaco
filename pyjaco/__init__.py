@@ -72,7 +72,7 @@ class Compiler(object):
     def __init__(self, jsvars = None, opts = dict()):
         defaults = dict(check_params = True)
 
-        compiler_opts = dict()
+        compiler_opts = {}
         compiler_opts.update(defaults)
         compiler_opts.update(opts)
         self.compiler = pyjaco.compiler.multiplexer.Compiler(jsvars, compiler_opts)
@@ -86,15 +86,11 @@ class Compiler(object):
         return self.buffer.getvalue()
 
     def dedent(self, code, body):
-        if body:
-            if code[0].lstrip().startswith('def'):
-                code.pop(0)
+        if body and code[0].lstrip().startswith('def'):
+            code.pop(0)
 
         dedent = len(code[0]) - len(code[0].lstrip())
-        res = []
-        for c in code:
-            res.append(c[dedent:])
-
+        res = [c[dedent:] for c in code]
         return "\n".join(res)
 
     def find_js(self, names):

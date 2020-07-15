@@ -27,8 +27,8 @@ class GoL(object):
     def iter(self):
         toDie = []
         toLive = []
-        for x in range(0, self.width):
-            for y in range(0, self.height):
+        for x in range(self.width):
+            for y in range(self.height):
                 count = 0
                 if self.get(x-1, y-1):
                     count += 1
@@ -47,19 +47,15 @@ class GoL(object):
                 if self.get(x+1, y+1):
                     count += 1
 
-                if self.get(x, y):
-                    if count < 2:
-                        toDie.append(x + y*self.width)
-                    elif count > 3:
-                        toDie.append(x + y*self.width)
-                else:
-                    if count == 3:
-                        toLive.append(x + y*self.width)
+                if self.get(x, y) and count < 2 or self.get(x, y) and count > 3:
+                    toDie.append(x + y*self.width)
+                elif not self.get(x, y) and (self.get(x, y) or count == 3):
+                    toLive.append(x + y*self.width)
 
-        for i in range(len(toDie)):
-            self.grid[toDie[i]] = False
-        for i in range(len(toLive)):
-            self.grid[toLive[i]] = True
+        for item in toDie:
+            self.grid[item] = False
+        for item_ in toLive:
+            self.grid[item_] = True
 
         self.draw()
 

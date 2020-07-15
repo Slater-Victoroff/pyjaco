@@ -90,7 +90,11 @@ class Compiler(pyjaco.compiler.BaseCompiler):
     def visit_Name(self, node):
         name = self.name_map.get(node.id, node.id)
 
-        if (name in self.builtin) and not ((name in self._scope) or (name in self._funcs)):
+        if (
+            name in self.builtin
+            and name not in self._scope
+            and name not in self._funcs
+        ):
             name = "__builtins__.PY$" + name
 
         return name
@@ -108,31 +112,15 @@ class Compiler(pyjaco.compiler.BaseCompiler):
     def visit_FunctionDef(self, node):
         defaults = [None] * (len(node.args.args) - len(node.args.defaults)) + node.args.defaults
 
-        if node.args.kwarg:
-            kwarg_name = node.args.kwarg
-        else:
-            kwarg_name = "__kwargs"
-
-        if node.args.vararg:
-            vararg_name = node.args.vararg
-        else:
-            vararg_name = "__varargs"
-
-        if len(node.args.args) and node.args.args[0].id == "self":
-            offset = 1
-        else:
-            offset = 0
-
+        kwarg_name = node.args.kwarg if node.args.kwarg else "__kwargs"
+        vararg_name = node.args.vararg if node.args.vararg else "__varargs"
+        offset = 1 if len(node.args.args) and node.args.args[0].id == "self" else 0
         self._scope = [arg.id for arg in node.args.args]
         self._funcs.append(node.name)
 
         inclass = self.stack_destiny(["ClassDef", "FunctionDef"], 2) in ["ClassDef"]
 
-        if inclass:
-            js = ["function() {"]
-        else:
-            js = ["var %s = function() {" % (node.name)]
-
+        js = ["function() {"] if inclass else ["var %s = function() {" % (node.name)]
         if inclass or offset == 1:
             js.extend(self.indent(["var self = this;"]))
 
@@ -151,7 +139,7 @@ class Compiler(pyjaco.compiler.BaseCompiler):
             else:
                 values['fullfunc'] = node.name
 
-            if defaults[i + offset] == None:
+            if defaults[i + offset] is None:
                 js.extend(self.indent(["var %(id)s = ('%(rawid)s' in %(kwarg)s) ? %(kwarg)s['%(rawid)s'] : %(newargs)s[%(i)d];" % values]))
             else:
                 values['default'] = self.visit(defaults[i + offset])
@@ -254,10 +242,9 @@ class Compiler(pyjaco.compiler.BaseCompiler):
             for i, target in enumerate(target.elts):
                 var = self.visit(target)
                 declare = ""
-                if isinstance(target, ast.Name):
-                    if not (var in self._scope):
-                        self._scope.append(var)
-                        declare = "var "
+                if isinstance(target, ast.Name) and var not in self._scope:
+                    self._scope.append(var)
+                    declare = "var "
                 js.append("%s%s = %s.PY$__getitem__(%d);" % (declare, var, dummy, i))
         elif isinstance(target, ast.Subscript) and isinstance(target.slice, ast.Index):
             # found index assignment
@@ -268,7 +255,7 @@ class Compiler(pyjaco.compiler.BaseCompiler):
         else:
             if isinstance(target, ast.Name):
                 var = target.id
-                if not (var in self._scope):
+                if var not in self._scope:
                     self._scope.append(var)
                     declare = "var "
                 else:
@@ -411,8 +398,7 @@ class Compiler(pyjaco.compiler.BaseCompiler):
         if node.orelse:
             raise JSError("Try-Except with else-clause not supported")
 
-        js = []
-        js.append("try {")
+        js = ["try {"]
         for n in node.body:
             js.extend(self.indent(self.visit(n)))
         err = self.alloc_var()
@@ -420,10 +406,7 @@ class Compiler(pyjaco.compiler.BaseCompiler):
         js.append("} catch (%s) {" % err)
         catchall = False
         for i, n in enumerate(node.handlers):
-            if i > 0:
-                pre = "else "
-            else:
-                pre = ""
+            pre = "else " if i > 0 else ""
             if n.type:
                 if isinstance(n.type, ast.Name):
                     js.extend(self.indent(["%sif ($PY.isinstance(%s, %s)) {" % (pre, err, self.visit(n.type))]))
@@ -541,7 +524,7 @@ class Compiler(pyjaco.compiler.BaseCompiler):
         elif isinstance(op, ast.NotIn):
             return "$PY.__not__(%s.PY$__contains__(%s))" % (self.visit(comp), self.visit(node.left))
         else:
-            raise JSError("Unknown comparison type %s" % node.ops[0])
+            raise JSError("Unknown comparison type %s" % op)
 
     def visit_Num(self, node):
         if isinstance(node.n, (int, long)):
@@ -568,13 +551,8 @@ class Compiler(pyjaco.compiler.BaseCompiler):
         compound = ("Assign" in self.stack) or ("AugAssign" in self.stack) or (self.stack.count("Call") > 1)
 
         if node.keywords or node.kwargs:
-            keywords = []
-            for kw in node.keywords:
-                keywords.append("%s: %s" % (kw.arg, self.visit(kw.value)))
-            if node.kwargs:
-                kwparam = ", %s" % self.visit(node.kwargs)
-            else:
-                kwparam = ""
+            keywords = ["%s: %s" % (kw.arg, self.visit(kw.value)) for kw in node.keywords]
+            kwparam = ", %s" % self.visit(node.kwargs) if node.kwargs else ""
             kwargs = ["__kwargs_make({%s}%s)" % (", ".join(keywords), kwparam)]
         else:
             kwargs = []
@@ -614,9 +592,11 @@ class Compiler(pyjaco.compiler.BaseCompiler):
         return "tuple([%s])" % (", ".join(els))
 
     def visit_Dict(self, node):
-        els = []
-        for k, v in zip(node.keys, node.values):
-            els.append("%s, %s" % (self.visit(k), self.visit(v)))
+        els = [
+            "%s, %s" % (self.visit(k), self.visit(v))
+            for k, v in zip(node.keys, node.values)
+        ]
+
         return "dict([%s])" % (", ".join(els))
 
     def visit_List(self, node):
@@ -641,9 +621,7 @@ class Compiler(pyjaco.compiler.BaseCompiler):
                 res += "var %s = %s.PY$__getitem__($c%d);\n" % (n, var, i)
 
         if node.ifs:
-            ifexp = []
-            for exp in node.ifs:
-                ifexp.append("bool(%s) === False" % self.visit(exp))
+            ifexp = ["bool(%s) === False" % self.visit(exp) for exp in node.ifs]
             res += "if (%s) { continue; }" % (" || ".join(ifexp))
         return res
 
@@ -656,7 +634,7 @@ class Compiler(pyjaco.compiler.BaseCompiler):
         return "(function() {var %s = list(); %s; return %s})()" % (res_var, exp, res_var)
 
     def visit_GeneratorExp(self, node):
-        if not len(node.generators) == 1:
+        if len(node.generators) != 1:
             raise JSError("Compound generator expressions not supported")
         if not isinstance(node.generators[0].target, ast.Name):
             raise JSError("Non-simple targets in generator expressions not supported")

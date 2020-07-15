@@ -72,11 +72,7 @@ class Compiler(pyjaco.compiler.BaseCompiler):
         self.comp_py.stack = self.stack
         self.comp_js.stack = self.stack
 
-        if jsvars:
-            self.jsvars = jsvars[:]
-        else:
-            self.jsvars = []
-
+        self.jsvars = jsvars[:] if jsvars else []
         self.enter("py")
 
     def enter(self, mode):
@@ -110,7 +106,7 @@ class Compiler(pyjaco.compiler.BaseCompiler):
         return res
 
     def get_mode(self, node):
-        if not node in self.modecache:
+        if node not in self.modecache:
             self.modecache[node] = self.get_mode_simple(node)
         return self.modecache[node]
 

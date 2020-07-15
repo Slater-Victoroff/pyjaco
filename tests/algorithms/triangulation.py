@@ -26,16 +26,16 @@ def is_on_the_left(c, a, b, pts_list):
    return (ux*vy - uy*vx > 0)
 
 def criterion(a, b, c, pts_list):
-   ax, ay = pts_list[a]
-   bx, by = pts_list[b]
-   cx, cy = pts_list[c]
-   ux = float(ax - cx)
-   uy = float(ay - cy)
-   vx = float(bx - cx)
-   vy = float(by - cy)
-   len_u = sqrt(ux*ux + uy*uy)
-   len_v = sqrt(vx*vx + vy*vy)
-   return (ux*vx + uy*vy)/(len_u*len_v)
+    ax, ay = pts_list[a]
+    bx, by = pts_list[b]
+    cx, cy = pts_list[c]
+    ux = float(ax - cx)
+    uy = float(ay - cy)
+    vx = float(bx - cx)
+    vy = float(by - cy)
+    len_u = sqrt(ux**2 + uy**2)
+    len_v = sqrt(vx**2 + vy**2)
+    return (ux*vx + uy*vy)/(len_u*len_v)
 
 def find_third_point(a, b, pts_list, edges):
     """
@@ -64,10 +64,10 @@ def find_third_point(a, b, pts_list, edges):
     return pt_index
 
 def lies_inside(c, bdy_edges):
-   for edge in bdy_edges:
-       a,b = edge
-       if c == a or c == b: return False
-   return True
+    for edge in bdy_edges:
+        a,b = edge
+        if c in [a, b]: return False
+    return True
 
 def is_boundary_edge(a, b, bdy_edges):
     """
@@ -138,8 +138,8 @@ def edge_intersects_edges(e1, nodes, edges):
     """
     Returns True if "e1" intersects any edge from "edges".
     """
-    for i in range(len(edges)):
-        e2 = edges[i]
+    for edge in edges:
+        e2 = edge
         if e1[1] == e2[0] or e1[0] == e2[1]:
             continue
         if two_edges_intersect(nodes, e1, e2):

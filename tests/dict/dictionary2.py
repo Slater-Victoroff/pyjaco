@@ -4,15 +4,11 @@ def dict1():
 
 def dict2():
     a = {1: 3, "s": 4}
-    b = a[1] + a["s"]
-    return b
+    return a[1] + a["s"]
 
 def dict3():
-    a = {}
-    a[1] = 3
-    a["s"] = 4
-    b = a[1] + a["s"]
-    return b
+    a = {1: 3, "s": 4}
+    return a[1] + a["s"]
 
 print dict1()
 print dict2()

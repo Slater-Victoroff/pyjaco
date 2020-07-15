@@ -16,7 +16,7 @@ class TodosApp:
 
         if js_stored_todos:
             stored_dict = dict(py(JSON.parse(js_stored_todos)))
-            self.todos = dict([(int(i), stored_dict[i]) for i in stored_dict.keys()])
+            self.todos = dict([(int(i), stored_dict[i]) for i in stored_dict])
             self.next_id = max(self.todos.keys()) + 1
 
         self.render()

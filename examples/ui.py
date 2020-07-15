@@ -86,8 +86,7 @@ def get_panel():
             "html": "<canvas id='canvas' width='200' height='200'></canvas>",
             "collapsible": true
             }
-    p = Panel(items)
-    return p
+    return Panel(items)
 
 def toolbar_mesh1(b, e):
     canvas = Canvas('canvas')

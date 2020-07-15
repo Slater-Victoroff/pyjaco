@@ -90,7 +90,7 @@ class Compiler(pyjaco.compiler.BaseCompiler):
     def visit_Name(self, node):
         name = self.name_map.get(node.id, node.id)
 
-        if (name in self.builtin) and not (name in self._scope):
+        if name in self.builtin and name not in self._scope:
             name = "__builtins__." + name
 
         return name
@@ -118,10 +118,9 @@ class Compiler(pyjaco.compiler.BaseCompiler):
             for i, target in enumerate(target.elts):
                 var = self.visit(target)
                 declare = ""
-                if isinstance(target, ast.Name):
-                    if not (var in self._scope):
-                        self._scope.append(var)
-                        declare = "var "
+                if isinstance(target, ast.Name) and var not in self._scope:
+                    self._scope.append(var)
+                    declare = "var "
                 js.append("%s%s = %s[%d];" % (declare, var, part, i))
         elif isinstance(target, ast.Subscript) and isinstance(target.slice, ast.Index):
             # found index assignment
@@ -135,7 +134,7 @@ class Compiler(pyjaco.compiler.BaseCompiler):
         else:
             var = self.visit(target)
             if isinstance(target, ast.Name):
-                if not (var in self._scope):
+                if var not in self._scope:
                     self._scope.append(var)
                     declare = "var "
                 else:
@@ -343,9 +342,7 @@ class Compiler(pyjaco.compiler.BaseCompiler):
         func = self.visit(node.func)
 
         if node.keywords:
-            keywords = []
-            for kw in node.keywords:
-                keywords.append("%s: %s" % (kw.arg, self.visit(kw.value)))
+            keywords = ["%s: %s" % (kw.arg, self.visit(kw.value)) for kw in node.keywords]
             keywords = "{" + ", ".join(keywords) + "}"
             js_args = ", ".join([ self.visit(arg) for arg in node.args ])
             return "%s.args([%s], %s)" % (func, js_args,
@@ -374,9 +371,11 @@ class Compiler(pyjaco.compiler.BaseCompiler):
         return "[%s]" % (", ".join(els))
 
     def visit_Dict(self, node):
-        els = []
-        for k, v in zip(node.keys, node.values):
-            els.append("%s: %s" % (self.visit(k), self.visit(v)))
+        els = [
+            "%s: %s" % (self.visit(k), self.visit(v))
+            for k, v in zip(node.keys, node.values)
+        ]
+
         return "{%s}" % (", ".join(els))
 
     def visit_List(self, node):

@@ -72,9 +72,8 @@ class Writer(object):
                 self.write("\n")
             self.write(" " * (width - self._write_pos - len(text)))
 
-        if self._line_wrap:
-            if text != "" and text[0] != "\n":
-                self._file.write("\n")
+        if self._line_wrap and text != "" and text[0] != "\n":
+            self._file.write("\n")
 
         self._file.write(text)
         self._file.flush()

@@ -21,8 +21,8 @@ def criterion(a, b, c, pts_list):
    uy = float(ay - cy)
    vx = float(bx - cx)
    vy = float(by - cy)
-   len_u = sqrt(ux*ux + uy*uy)
-   len_v = sqrt(vx*vx + vy*vy)
+   len_u = sqrt(ux**2 + uy**2)
+   len_v = sqrt(vx**2 + vy**2)
    return (ux*vx + uy*vy)/(len_u*len_v)
 
 def find_third_point(a, b, pts_list, edges):
@@ -53,8 +53,8 @@ def find_third_point(a, b, pts_list, edges):
 
 def lies_inside(c, bdy_edges):
    for edge in bdy_edges:
-       a,b = edge
-       if c == a or c == b: return False
+      a,b = edge
+      if c in [a, b]: return False
    return True
 
 def is_boundary_edge(a, b, bdy_edges):
@@ -109,16 +109,16 @@ def two_edges_intersect(nodes, e1, e2):
     return intersect(A, B, C, D)
 
 def edge_intersects_edges(e1, nodes, edges):
-    """
+   """
     Returns True if 'e1' intersects any edge from 'edges'.
     """
-    for i in range(len(edges)):
-        e2 = edges[i]
-        if e1[1] == e2[0] or e1[0] == e2[1]:
-            continue
-        if two_edges_intersect(nodes, e1, e2):
-            return True
-    return False
+   for edge in edges:
+      e2 = edge
+      if e1[1] == e2[0] or e1[0] == e2[1]:
+          continue
+      if two_edges_intersect(nodes, e1, e2):
+          return True
+   return False
 
 @JSVar("document", "canvas", "scale", "x0")
 def start_triag():
@@ -156,9 +156,8 @@ def start_triag():
     canvas.stroke()
 
 def example1():
-    nodes, edges, elems = example2()
-    result = str(nodes) + "\n" + str(edges) + "\n" + str(elems)
-    return result
+   nodes, edges, elems = example2()
+   return str(nodes) + "\n" + str(edges) + "\n" + str(elems)
 
 def example2():
     nodes = [

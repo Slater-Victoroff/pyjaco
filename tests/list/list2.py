@@ -1,9 +1,5 @@
 def list1(n):
-    a = []
-    a.append(1)
-    a.append(2)
-    a.append(3)
-    a.append(n)
+    a = [1, 2, 3, n]
     return a[0] + a[1] + a[2] + a[3]
 
 def list2():

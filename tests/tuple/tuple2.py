@@ -4,10 +4,7 @@ def tuple1(x):
     return a+b+c
 
 def tuple2(n):
-    a = 0
-    for i in (1, 2, n):
-        a += i
-    return a
+    return sum((1, 2, n))
 
 def tuple3():
     a = (1, 3, 5, 4, 9, 1, 2, 3)

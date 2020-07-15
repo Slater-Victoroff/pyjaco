@@ -62,15 +62,15 @@ class BuiltinGenerator(object):
 def compile_file(infile, outfile, options):
     '''Compile a single python file object to a single javascript output file
     object'''
-    if options.builtins == "include":
+    if options.builtins == "import":
+        outfile.write('load("py-builtins.js");\n')
+
+    elif options.builtins == "include":
         builtins = BuiltinGenerator().generate_builtins()
 
         outfile.write("/*%s*/\n" % "  Standard library  ".center(76, "*"))
         outfile.write(builtins)
         outfile.write("/*%s*/\n" % "  User code  ".center(76, "*"))
-    elif options.builtins == "import":
-        outfile.write('load("py-builtins.js");\n')
-
     c = Compiler()
     c.append_string(infile.read())
     outfile.write(str(c))
@@ -165,7 +165,7 @@ class Monitor:
             mtime = stat.st_mtime
             mtime = mtime - stat.st_ctime if sys.platform == "win32" else mtime
 
-            if self.mtimes.get(filename) == None:
+            if self.mtimes.get(filename) is None:
                 self.mtimes[filename] = mtime
                 continue
 
